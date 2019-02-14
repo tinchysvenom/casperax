@@ -7,7 +7,6 @@ Created on Mon Jan 14 20:55:45 2019
 
 
 import re
-import os
 import gc
 import time
 from selenium import webdriver
@@ -72,7 +71,7 @@ def post_summarizer(article):
 post_targets = [2509, 2751, 2517, 2761, 2523, 2763, 2529, 2769, 2539, 2781, 2547, 2793, 2557, 2803, 2643, 2889]
 post_var = 0
 todays_post_target = post_targets[post_var]
-sec_intervals = (54000/todays_post_target) - 3
+sec_intervals = (54000/todays_post_target)
 completed = 0
 landage = 0
 pager = 0
@@ -86,6 +85,7 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
         chrome_options.add_argument("--disable-gpu")
         chrome_options.add_argument('--disable-dev-shm-usage')
         chrome_options.add_argument("--disable-infobars")
+        chrome_options.add_argument("--disable-notifications")
         chrome_options.binary_location = '/app/.apt/usr/bin/google-chrome'
         driver = webdriver.Chrome(executable_path="chromedriver",   options=chrome_options)
         driver.get("https://wakanda.ng/login")
@@ -123,6 +123,11 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
             
         while True: #click post
             try:
+                try:
+                    driver.switch_to.alert.dismiss()
+                except:
+                    pass
+
                 if serum == False:
                     first_post_box = driver.find_element_by_class_name('blog-list-details') #this section would select the first post ont he landing page and proceed
                     la_herd = first_post_box.find_elements_by_class_name('item-details')
@@ -172,15 +177,20 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
         while completed < todays_post_target: 
             try: #read post and send reply
                 try:
+                    driver.switch_to.alert.dismiss()
+                except:
+                    pass
+                
+                WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.CLASS_NAME, 'topic-content')))
+                try:
                     username = driver.find_element_by_class_name('plan2-recommended')
                     username = username.text
                 except:
                     username = driver.find_element_by_class_name('float-left')
                     username = username.text[0:-10]
                 
-                WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.CLASS_NAME, 'topic-content')))
                 start_time = time.time()
-                end_time = start_time + sec_intervals                   
+                end_time = start_time + (sec_intervals/2)                   
                 while time.time() <= end_time: #this section find the post needed and summarize it scroll down to the comments section and post the summary, scroll back up and hover over some ads
                     try:
                         passiv = driver.find_element_by_class_name('topic-content') #find the post and needed and summarize it
@@ -230,25 +240,17 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
                 time.sleep(2.5)
                 continue
             
-            time.sleep(3)
             del start_time, end_time, username, passiv, logbut, la_herd, first_post_box, summary_comment
             gc.collect()
             
-            while True:
+            while True: #first go back to the landing page and go to the next post
                 try:
-                    driver.execute_script("window.history.go(-2)") #first go back to the landing page
+                    driver.execute_script("window.history.go(-2)") 
                 except:
                     driver.refresh()
-                    yari = driver.find_element_by_class_name('logo')
-                    yari.click()
+                    driver.find_element_by_class_name('logo').click()
+                time.sleep(sec_intervals/4)
                     
-                    del yari
-                    gc.collect()
-                break
-            
-            time.sleep(5)
-            
-            while True: #go to the next post
                 try:
                     WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.CLASS_NAME, 'blog')))
                     username = driver.find_element_by_class_name('blog') #find all elements that represent an article
@@ -266,7 +268,7 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
                         noci = first_post[landage].find_element_by_tag_name('a') #use landage variable to select one page
                         ActionChains(driver).move_to_element(noci).perform()
                         noci.click() #open the selected page
-                        driver.implicitly_wait(4)
+                        driver.implicitly_wait(sec_intervals/4)
                         driver.refresh()
                 
                         del logbut, first_post_box, la_herd, first_post
@@ -275,7 +277,7 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
                         noci = passiv[landage].find_element_by_tag_name('a') #use landage variable to select one page
                         ActionChains(driver).move_to_element(noci).perform()
                         noci.click() #open the selected page
-                        
+                        driver.implicitly_wait(sec_intervals/4)
                         del noci
                         gc.collect()
                         
@@ -287,24 +289,29 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
                     elif completed % 10 == 0:
                         print('No of posts:', completed)
                     else: pass
-            
-                    if time.localtime()[3] > 22 or completed == todays_post_target:
-                        post_var += 1
-                        completed = 0
-                        landage = 0
-                        driver.close()
-                        driver.quit()
-                        print('about to sleep')
+                        
                 except:
                     print('error at go to next post section')
                     driver.refresh()
-                    time.sleep(3)
+                    try:
+                        driver.switch_to.alert.dismiss()
+                    except:
+                        driver.execute_script("window.history.go(-1)")
                     continue
                 break
-            
-            time.sleep(5)
+
             del username, passiv
             gc.collect()
+            
+            if time.localtime()[3] > 22 or completed == todays_post_target:
+                post_var += 1
+                completed = 0
+                landage = 0
+                driver.close()
+                driver.quit()
+                print('about to sleep')
+                break
+            else: continue
 
     except:
         print('error at connection section')
@@ -312,7 +319,7 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
         driver.close()
         driver.quit()
         continue
-    break
+    
+    time.sleep(35000)
+    continue
         
-time.sleep(15000)
-
