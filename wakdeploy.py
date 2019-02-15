@@ -78,6 +78,7 @@ pager = 0
 serum = False
 
 while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
+    tata = 0
     try:
         chrome_options = Options() #the code to open/connect to the site starts here, the code to handle the login goes here
         chrome_options.add_argument("--headless")
@@ -174,7 +175,7 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
         del first_post_box, la_herd, first_post
         gc.collect()
             
-        while completed < todays_post_target: 
+        while completed < todays_post_target and tata <=5: 
             try: #read post and send reply
                 try:
                     driver.switch_to.alert.dismiss()
@@ -243,14 +244,14 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
             del start_time, end_time, username, passiv, logbut, la_herd, first_post_box, summary_comment
             gc.collect()
             
-            while True: #first go back to the landing page and go to the next post
-                try:
-                    driver.execute_script("window.history.go(-2)") 
-                except:
-                    driver.refresh()
-                    driver.find_element_by_class_name('logo').click()
-                time.sleep(sec_intervals/4)
-                    
+            try: #first go back to the landing page
+                driver.execute_script("window.history.go(-2)") 
+            except:
+                driver.refresh()
+                driver.find_element_by_class_name('logo').click()
+            time.sleep(sec_intervals/4)
+            
+            while tata < 5:  #go to the next post
                 try:
                     WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.CLASS_NAME, 'blog')))
                     username = driver.find_element_by_class_name('blog') #find all elements that represent an article
@@ -289,20 +290,24 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
                     elif completed % 10 == 0:
                         print('No of posts:', completed)
                     else: pass
-                        
+                    break
                 except:
                     print('error at go to next post section')
                     driver.refresh()
                     try:
                         driver.switch_to.alert.dismiss()
                     except:
-                        driver.execute_script("window.history.go(-1)")
+                        driver.refresh()
+                        tata += 1
                     continue
-                break
-
+                
             del username, passiv
             gc.collect()
             
+            if tata >= 5:
+                tata += 2
+            else: pass
+        
             if time.localtime()[3] > 22 or completed == todays_post_target:
                 post_var += 1
                 completed = 0
@@ -312,7 +317,14 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
                 print('about to sleep')
                 break
             else: continue
-
+        
+        if tata > 5:
+            driver.close()
+            driver.quit()
+            time.sleep(60)
+            continue
+        else: pass
+    
     except:
         print('error at connection section')
         serum = True
@@ -323,3 +335,5 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
     time.sleep(35000)
     continue
         
+
+
