@@ -321,7 +321,7 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
         if tata > 5:
             driver.close()
             driver.quit()
-            time.sleep(60)
+            time.sleep(600)
             continue
         else: pass
     
