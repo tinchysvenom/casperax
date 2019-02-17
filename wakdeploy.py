@@ -72,7 +72,7 @@ post_targets = [2509, 2751, 2517, 2761, 2523, 2763, 2529, 2769, 2539, 2781, 2547
 post_var = 0
 todays_post_target = post_targets[post_var]
 sec_intervals = (54000/todays_post_target)
-completed = 44
+completed = 0
 landage = 0
 pager = 0
 serum = False
@@ -245,7 +245,7 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
             gc.collect()
             
             try: #first go back to the landing page
-                driver.execute_script("window.history.go(-2)") 
+                driver.find_element_by_class_name('logo').click() 
             except:
                 driver.refresh()
                 driver.find_element_by_class_name('logo').click()
@@ -265,14 +265,14 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
                         first_post_box.click()#click the next button
                         WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.CLASS_NAME, 'blog-list-details')))
                         la_herd = driver.find_element_by_class_name('blog-list-details') #find all elements that represent an article
-                        first_post = la_herd.find_elements_by_class_name('entry-title')
+                        first_post = la_herd.find_elements_by_class_name('item-details')
                         noci = first_post[landage].find_element_by_tag_name('a') #use landage variable to select one page
                         ActionChains(driver).move_to_element(noci).perform()
                         noci.click() #open the selected page
                         driver.implicitly_wait(sec_intervals/4)
                         driver.refresh()
                 
-                        del logbut, first_post_box, la_herd, first_post
+                        del logbut, first_post_box, la_herd, first_post, noci
                         gc.collect()
                     else:
                         noci = passiv[landage].find_element_by_tag_name('a') #use landage variable to select one page
@@ -312,23 +312,20 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
                 post_var += 1
                 completed = 0
                 landage = 0
-                driver.close()
                 driver.quit()
                 print('about to sleep')
                 break
             else: continue
         
         if tata > 5:
-            driver.close()
             driver.quit()
-            time.sleep(600)
+            time.sleep(60)
             continue
         else: pass
     
     except:
         print('error at connection section')
         serum = True
-        driver.close()
         driver.quit()
         continue
     
