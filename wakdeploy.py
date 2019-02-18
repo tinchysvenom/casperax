@@ -74,8 +74,8 @@ todays_post_target = post_targets[post_var]
 sec_intervals = (54000/todays_post_target)
 completed = 0
 landage = 0
-pager = 0
-serum = False
+pager = 1
+serum = True
 
 while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
     tata = 0
@@ -92,7 +92,7 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
         driver.get("https://wakanda.ng/login")
         time.sleep(5)
             
-        while True: #log in
+        while tata < 5: #log in
             try:
                 WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.ID, 'nameField')))
                 username = driver.find_element_by_id('nameField')
@@ -113,22 +113,27 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
             
             except:
                 print('error at login section')
-                driver.refresh()
-                time.sleep(2)
+                try:
+                    driver.switch_to.alert.dismiss()
+                except:
+                    driver.refresh()
+                    tata += 1
                 continue
-            break
         
         time.sleep(5)
         del username, passiv, logbut
         gc.collect()
+        
+        if tata >= 5:
+            tata = 0
+            driver.quit()
+            time.sleep(200)
+            continue
+        else: 
+            tata = 0
             
-        while True: #click post
+        while tata < 5: #click post
             try:
-                try:
-                    driver.switch_to.alert.dismiss()
-                except:
-                    pass
-
                 if serum == False:
                     first_post_box = driver.find_element_by_class_name('blog-list-details') #this section would select the first post ont he landing page and proceed
                     la_herd = first_post_box.find_elements_by_class_name('item-details')
@@ -153,7 +158,6 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
                             ActionChains(driver).move_to_element(logbut).perform()
                             logbut.click()
                             noci += 1
-                            time.sleep(2)
                                 
                         del username, passiv, logbut, noci
                         gc.collect()
@@ -166,14 +170,24 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
                         driver.refresh()
             except:
                 print('error at click post section')
-                driver.refresh()
-                time.sleep(2)
+                try:
+                    driver.switch_to.alert.dismiss()
+                except:
+                    driver.refresh()
+                    tata += 1
                 continue
-            break
-        
+
         time.sleep(5)
         del first_post_box, la_herd, first_post
         gc.collect()
+        
+        if tata >= 5:
+            tata = 0
+            driver.quit()
+            time.sleep(200)
+            continue
+        else: 
+            tata = 0 
             
         while completed < todays_post_target and tata <=5: 
             try: #read post and send reply
@@ -259,6 +273,8 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
                     
                     if landage > len(passiv): #if the landage variable is greater than the number of articles present go to the next page on the pagination
                         landage = 0 #set the landage variable to 0
+                        serum = True
+                        pager += 1
                         logbut = username.find_elements_by_tag_name('a')
                         first_post_box = logbut[-1]
                         ActionChains(driver).move_to_element(first_post_box).perform()
@@ -319,7 +335,7 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
         
         if tata > 5:
             driver.quit()
-            time.sleep(60)
+            time.sleep(200)
             continue
         else: pass
     
