@@ -157,6 +157,7 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
                             logbut = passiv[-1]
                             ActionChains(driver).move_to_element(logbut).perform()
                             logbut.click()
+                            time.sleep(5)
                             noci += 1
                                 
                         del username, passiv, logbut, noci
