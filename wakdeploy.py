@@ -74,8 +74,8 @@ todays_post_target = post_targets[post_var]
 sec_intervals = (54000/todays_post_target)
 completed = 0
 landage = 0
-pager = 1
-serum = True
+pager = 0
+serum = False
 
 while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
     tata = 0
@@ -94,7 +94,7 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
             
         while tata < 5: #log in
             try:
-                WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.ID, 'nameField')))
+                WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.ID, 'nameField')))
                 username = driver.find_element_by_id('nameField')
                 ActionChains(driver).move_to_element(username).perform()
                 username.click()
@@ -110,6 +110,7 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
                 logbut = driver.find_element_by_xpath('//*[@id="main"]/div[4]/div/div/div[1]/div/div/form/div[4]/button')
                 ActionChains(driver).move_to_element(logbut).perform()
                 logbut.click()
+                break
             
             except:
                 print('error at login section')
@@ -125,7 +126,6 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
         gc.collect()
         
         if tata >= 5:
-            tata = 0
             driver.quit()
             time.sleep(200)
             continue
@@ -168,6 +168,7 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
                         first_post.click()
                         time.sleep(2.5)
                         driver.refresh()
+                break
             except:
                 print('error at click post section')
                 try:
@@ -182,7 +183,6 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
         gc.collect()
         
         if tata >= 5:
-            tata = 0
             driver.quit()
             time.sleep(200)
             continue
