@@ -276,8 +276,7 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
                         first_post_box = logbut[-1]
                         ActionChains(driver).move_to_element(first_post_box).perform()
                         first_post_box.click()#click the next button
-                        
-                        pass
+                        print('papaya')
                         la_herd = driver.find_element_by_class_name('blog-list-details') #find all elements that represent an article
                         first_post = la_herd.find_elements_by_class_name('item-details')
                         noci = first_post[landage].find_element_by_tag_name('a') #use landage variable to select one page
