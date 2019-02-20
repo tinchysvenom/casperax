@@ -151,13 +151,12 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
                         driver.refresh()
                     else:
                         noci = 0
-                        while noci <= pager:
+                        while noci < pager:
                             username = driver.find_element_by_class_name('blog')
                             passiv = username.find_elements_by_tag_name('a')
                             logbut = passiv[-1]
                             ActionChains(driver).move_to_element(logbut).perform()
                             logbut.click()
-                            time.sleep(5)
                             noci += 1
                                 
                         del username, passiv, logbut, noci
@@ -259,12 +258,9 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
             del start_time, end_time, username, passiv, logbut, la_herd, first_post_box, summary_comment
             gc.collect()
             
-            try: #first go back to the landing page
-                driver.find_element_by_class_name('logo').click() 
-            except:
-                driver.refresh()
-                driver.find_element_by_class_name('logo').click()
-            time.sleep(sec_intervals/4)
+            landage += 1
+            completed += 1
+            driver.execute_script("window.history.go(-2)")
             
             while tata < 5:  #go to the next post
                 try:
@@ -272,7 +268,7 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
                     username = driver.find_element_by_class_name('blog') #find all elements that represent an article
                     passiv = username.find_elements_by_class_name('item-details')
                     
-                    if landage > len(passiv): #if the landage variable is greater than the number of articles present go to the next page on the pagination
+                    if landage >= len(passiv): #if the landage variable is greater than the number of articles present go to the next page on the pagination
                         landage = 0 #set the landage variable to 0
                         serum = True
                         pager += 1
@@ -280,7 +276,8 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
                         first_post_box = logbut[-1]
                         ActionChains(driver).move_to_element(first_post_box).perform()
                         first_post_box.click()#click the next button
-                        WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.CLASS_NAME, 'blog-list-details')))
+                        
+                        pass
                         la_herd = driver.find_element_by_class_name('blog-list-details') #find all elements that represent an article
                         first_post = la_herd.find_elements_by_class_name('item-details')
                         noci = first_post[landage].find_element_by_tag_name('a') #use landage variable to select one page
@@ -299,9 +296,6 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
                         del noci
                         gc.collect()
                         
-                    landage += 1
-                    completed += 1
-            
                     if completed <=5:
                         print('No of posts:', completed)
                     elif completed % 10 == 0:
