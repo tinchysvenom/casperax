@@ -110,6 +110,7 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
                 logbut = driver.find_element_by_xpath('//*[@id="main"]/div[4]/div/div/div[1]/div/div/form/div[4]/button')
                 ActionChains(driver).move_to_element(logbut).perform()
                 logbut.click()
+                del username, passiv, logbut
                 break
             
             except:
@@ -121,8 +122,7 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
                     time.sleep(sec_intervals/4)
                     tata += 1
                 continue
-        
-        del username, passiv, logbut
+                
         gc.collect()
         
         if tata >= 5:
