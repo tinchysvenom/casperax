@@ -75,7 +75,7 @@ sec_intervals = (54000/todays_post_target)
 completed = 0
 landage = 0
 pager = 0
-serum = False
+current_url = "https://wakanda.ng/?page=" + str(pager)
 
 while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
     tata = 0
@@ -91,7 +91,7 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
         driver = webdriver.Chrome(executable_path="chromedriver",   options=chrome_options)
         driver.get("https://wakanda.ng/login")
         time.sleep(5)
-            
+        
         while tata < 5: #log in
             try:
                 WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.ID, 'nameField')))
@@ -118,10 +118,10 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
                     driver.switch_to.alert.dismiss()
                 except:
                     driver.refresh()
+                    time.sleep(sec_intervals/4)
                     tata += 1
                 continue
         
-        time.sleep(5)
         del username, passiv, logbut
         gc.collect()
         
@@ -131,43 +131,33 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
             continue
         else: 
             tata = 0
-            
+    except:
+        print('error at connection section')
+        driver.quit()
+        time.sleep(180)
+        continue
+
+        
+    while completed < todays_post_target:
+        tata = 0
         while tata < 5: #click post
             try:
-                if serum == False:
-                    first_post_box = driver.find_element_by_class_name('blog-list-details') #this section would select the first post ont he landing page and proceed
-                    la_herd = first_post_box.find_elements_by_class_name('item-details')
-                    first_post = la_herd[completed].find_element_by_tag_name('a')
-                    first_post.click()
-                    time.sleep(2.5)
-                    driver.refresh()
-                else:
-                    if pager == 0:
-                        first_post_box = driver.find_element_by_class_name('blog-list-details') #this section would select the first post ont he landing page and proceed
-                        la_herd = first_post_box.find_elements_by_class_name('item-details')
-                        first_post = la_herd[completed].find_element_by_tag_name('a')
-                        first_post.click()
-                        time.sleep(2.5)
-                        driver.refresh()
-                    else:
-                        noci = 0
-                        while noci < pager:
-                            username = driver.find_element_by_class_name('blog')
-                            passiv = username.find_elements_by_tag_name('a')
-                            logbut = passiv[-1]
-                            ActionChains(driver).move_to_element(logbut).perform()
-                            logbut.click()
-                            noci += 1
-                                
-                        del username, passiv, logbut, noci
-                        gc.collect()
+                WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.CLASS_NAME, 'blog-list-details')))
+                username = driver.find_element_by_class_name('blog-list-details') #find all elements that represent an article
+                passiv = username.find_elements_by_class_name('item-details')
                 
-                        first_post_box = driver.find_element_by_class_name('blog-list-details') #this section would select the first post ont he landing page and proceed
-                        la_herd = first_post_box.find_elements_by_class_name('item-details')
-                        first_post = la_herd[landage].find_element_by_tag_name('a')
-                        first_post.click()
-                        time.sleep(2.5)
-                        driver.refresh()
+                if landage >= len(passiv): #if the landage variable is greater than the number of articles present go to the next page on the pagination
+                    landage = 0
+                    pager += 1
+                    current_url = "https://wakanda.ng/?page=" + str(pager)
+                    driver.get(current_url)
+                    driver.implicitly_wait(sec_intervals/2)
+                    continue
+                else: pass
+                        
+                noci = passiv[landage].find_element_by_tag_name('a') #use landage variable to select one page
+                ActionChains(driver).move_to_element(noci).perform().click()
+                driver.implicitly_wait(sec_intervals/4)
                 break
             except:
                 print('error at click post section')
@@ -175,27 +165,22 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
                     driver.switch_to.alert.dismiss()
                 except:
                     driver.refresh()
+                    time.sleep(sec_intervals/4)
                     tata += 1
                 continue
-
-        time.sleep(5)
-        del first_post_box, la_herd, first_post
-        gc.collect()
         
+        del username, passiv, noci
+        gc.collect()
         if tata >= 5:
-            driver.quit()
+            driver.get(current_url)
             time.sleep(200)
             continue
         else: 
-            tata = 0 
+            tata = 0
             
-        while completed < todays_post_target and tata <=5: 
+        #read and summarize post
+        while tata < 5:
             try: #read post and send reply
-                try:
-                    driver.switch_to.alert.dismiss()
-                except:
-                    pass
-                
                 WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.CLASS_NAME, 'topic-content')))
                 try:
                     username = driver.find_element_by_class_name('plan2-recommended')
@@ -205,7 +190,7 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
                     username = username.text[0:-10]
                 
                 start_time = time.time()
-                end_time = start_time + (sec_intervals/2)                   
+                end_time = start_time + (sec_intervals - 3)                   
                 while time.time() <= end_time: #this section find the post needed and summarize it scroll down to the comments section and post the summary, scroll back up and hover over some ads
                     try:
                         passiv = driver.find_element_by_class_name('topic-content') #find the post and needed and summarize it
@@ -249,98 +234,63 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
                         driver.refresh()
                         time.sleep(2)
                         continue
+                break
             except:
                 print('error at read and summarize section')
-                driver.refresh()
-                time.sleep(2.5)
+                try:
+                    driver.switch_to.alert.dismiss()
+                except:
+                    driver.refresh()
+                    time.sleep(sec_intervals/4)
+                    tata += 1
                 continue
             
-            del start_time, end_time, username, passiv, logbut, la_herd, first_post_box, summary_comment
-            gc.collect()
-            
-            landage += 1
-            completed += 1
-            driver.execute_script("window.history.go(-2)")
-            
-            while tata < 5:  #go to the next post
-                try:
-                    WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.CLASS_NAME, 'blog')))
-                    username = driver.find_element_by_class_name('blog') #find all elements that represent an article
-                    passiv = username.find_elements_by_class_name('item-details')
-                    
-                    if landage >= len(passiv): #if the landage variable is greater than the number of articles present go to the next page on the pagination
-                        landage = 0 #set the landage variable to 0
-                        serum = True
-                        pager += 1
-                        logbut = username.find_elements_by_tag_name('a')
-                        first_post_box = logbut[-1]
-                        ActionChains(driver).move_to_element(first_post_box).perform()
-                        first_post_box.click()#click the next button
-                        print('papaya')
-                        la_herd = driver.find_element_by_class_name('blog-list-details') #find all elements that represent an article
-                        first_post = la_herd.find_elements_by_class_name('item-details')
-                        noci = first_post[landage].find_element_by_tag_name('a') #use landage variable to select one page
-                        ActionChains(driver).move_to_element(noci).perform()
-                        noci.click() #open the selected page
-                        driver.implicitly_wait(sec_intervals/4)
-                        driver.refresh()
-                
-                        del logbut, first_post_box, la_herd, first_post, noci
-                        gc.collect()
-                    else:
-                        noci = passiv[landage].find_element_by_tag_name('a') #use landage variable to select one page
-                        ActionChains(driver).move_to_element(noci).perform()
-                        noci.click() #open the selected page
-                        driver.implicitly_wait(sec_intervals/4)
-                        del noci
-                        gc.collect()
-                        
-                    if completed <=5:
-                        print('No of posts:', completed)
-                    elif completed % 10 == 0:
-                        print('No of posts:', completed)
-                    else: pass
-                    break
-                except:
-                    print('error at go to next post section')
-                    driver.refresh()
-                    try:
-                        driver.switch_to.alert.dismiss()
-                    except:
-                        driver.refresh()
-                        tata += 1
-                    continue
-                
-            del username, passiv
-            gc.collect()
-            
-            if tata >= 5:
-                tata += 2
-            else: pass
+        del start_time, end_time, username, passiv, logbut, la_herd, first_post_box, summary_comment
+        gc.collect()
         
-            if time.localtime()[3] > 22 or completed == todays_post_target:
-                post_var += 1
-                completed = 0
-                landage = 0
-                driver.quit()
-                print('about to sleep')
-                break
-            else: continue
-        
-        if tata > 5:
-            driver.quit()
+        if tata >= 5:
+            driver.get(current_url)
             time.sleep(200)
             continue
-        else: pass
-    
-    except:
-        print('error at connection section')
-        serum = True
-        driver.quit()
-        continue
-    
-    time.sleep(35000)
-    continue
+        else: 
+            tata = 0
         
+        # handle formalities
+        landage += 1
+        completed += 1
+        driver.get(current_url)
+        time.sleep(sec_intervals/4)
+        
+        if completed <=5:
+            print('No of posts:', completed)
+        elif completed % 10 == 0:
+            print('No of posts:', completed)
+        else: pass
+            
+    if completed == todays_post_target:
+        print('last page is: ', pager, '\n', 'next day post var is: ', post_var)
+        completed = 0
+        pager = 0
+        landage = 0
+        post_var += 1
+        driver.quit()
+        break
+    else: pass
+            
+            
 
+post_var += 1
+print('last page is: ', pager, '\n', 'next day post var is: ', post_var)
+completed = 0
+pager = 0
+landage = 0
+    
+if time.localtime()[3] == 23:            
+    time.sleep(32000)
+elif time.localtime()[3] in range(0,8):
+    time.sleep((8 - time.localtime()[3]) * 3600)
+else: pass
+        
+    
 
+    
