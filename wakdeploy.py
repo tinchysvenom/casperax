@@ -156,8 +156,10 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
                 else: pass
                         
                 noci = passiv[landage].find_element_by_tag_name('a') #use landage variable to select one page
-                ActionChains(driver).move_to_element(noci).perform().click()
+                ActionChains(driver).move_to_element(noci).perform()
+                noci.click()
                 driver.implicitly_wait(sec_intervals/4)
+                del username, passiv, noci
                 break
             except:
                 print('error at click post section')
@@ -169,7 +171,6 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
                     tata += 1
                 continue
         
-        del username, passiv, noci
         gc.collect()
         if tata >= 5:
             driver.get(current_url)
