@@ -66,17 +66,176 @@ def post_summarizer(article):
     del article, stopWords, art_words, sentence_list, i, xab, max_weight, xac, xad, l, xae, split_k, maxy, maxx, summary_list, summary
     gc.collect()
     
-    
-#3509, 3653, 3901, 3671, 3917, 3677, 3923, 3709, 3953, 3733, 3973, 3743, 3989, 3749, 3991   
-post_targets = [2509, 2751, 2517, 2761, 2523, 2763, 2529, 2769, 2539, 2781, 2547, 2793, 2557, 2803, 2643, 2889]
-post_var = 0
-todays_post_target = post_targets[post_var]
-sec_intervals = (54000/todays_post_target)
-completed = 25
-landage = 25
-pager = 0
-current_url = "https://wakanda.ng/?page=" + str(pager)
 
+def handler():
+    post_targets = [2509, 2751, 2517, 2761, 2523, 2763, 2529, 2769, 2539, 2781, 2547, 2793, 2557, 2803, 2643, 2889]
+    post_var = 0
+    todays_post_target = post_targets[post_var]
+    sec_intervals = (54000/todays_post_target)
+    completed = 0
+    landage = 0
+    pager = 1
+    current_url = "https://wakanda.ng/?page=" + str(pager)
+    while completed < todays_post_target:
+        try:
+            tata = 0
+            while tata < 5: #click post
+                try:
+                    driver.refresh()
+                    WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.CLASS_NAME, 'blog-list-details')))
+                    username = driver.find_element_by_class_name('blog-list-details') #find all elements that represent an article
+                    passiv = username.find_elements_by_class_name('item-details')
+                
+                    if landage >= len(passiv): #if the landage variable is greater than the number of articles present go to the next page on the pagination
+                        landage = 0
+                        pager += 1
+                        current_url = "https://wakanda.ng/?page=" + str(pager)
+                        driver.get(current_url)
+                        driver.implicitly_wait(sec_intervals/2)
+                        continue
+                    else: pass
+                        
+                    noci = passiv[landage].find_element_by_tag_name('a') #use landage variable to select one page
+                    ActionChains(driver).move_to_element(noci).perform()
+                    noci.click()
+                    driver.implicitly_wait(sec_intervals/4)
+                    
+                    del username, passiv, noci
+                    break
+                except:
+                    print('error at click post section')
+                    try:
+                        bany = driver.switch_to.alert
+                        bany.dismiss()
+                        del bany
+                    except:
+                        driver.refresh()
+                        time.sleep(sec_intervals/2)
+                        tata += 1
+                    continue
+        
+            gc.collect()
+            if tata >= 5:
+                tata = 0
+                try:
+                    driver.get(current_url)
+                    driver.implicitly_wait(10)
+                except:
+                    driver.get(current_url)
+                    driver.implicitly_wait(10)
+                time.sleep(180)
+                continue
+            else: tata = 0
+            
+            #read and summarize post
+            while tata < 5:
+                try: #read post and send reply
+                    WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.CLASS_NAME, 'topic-content')))
+                    try:
+                        username = driver.find_element_by_class_name('plan2-recommended')
+                        username = username.text
+                    except:
+                        username = driver.find_element_by_class_name('float-left')
+                        username = username.text[0:-10]
+                
+                    start_time = time.time()
+                    end_time = start_time + (sec_intervals - 3)                   
+                    while time.time() <= end_time: #this section find the post needed and summarize it scroll down to the comments section and post the summary, scroll back up and hover over some ads
+                        try:
+                            passiv = driver.find_element_by_class_name('topic-content') #find the post and needed and summarize it
+                            try:
+                                logbut = passiv.find_elements_by_tag_name('p')
+                                first_post_box = [note.text for note in logbut]
+                                la_herd = ''.join(first_post_box)
+                            except:
+                                try:
+                                    logbut = passiv.find_element_by_tag_name('p')
+                                    noci = logbut.find_elements_by_tag_name('span')
+                                    first_post_box = [note.text for note in noci]
+                                    la_herd = ''.join(first_post_box)
+                                except:
+                                    la_herd = ' '       
+                            
+                            try:
+                                summary_comment = post_summarizer(la_herd)
+                            except:
+                                summary_comment = username
+                        
+                            try:
+                                username = driver.find_element_by_id('editor') #scroll down to the comments section and post the summary
+                            except:
+                                break
+                            ActionChains(driver).move_to_element(username).perform()
+                            passiv = username.find_element_by_tag_name('iframe')
+                            driver.switch_to.frame(passiv)
+                            logbut = driver.find_element_by_tag_name('p')
+                            ActionChains(driver).move_to_element(logbut).perform()
+                            logbut.click()
+                            driver.execute_script("arguments[0].innerText = arguments[1] ", logbut, summary_comment)
+                            driver.switch_to.default_content()
+                            first_post_box = driver.find_element_by_id('ReplyButton')
+                            ActionChains(driver).move_to_element(first_post_box).perform()
+                            first_post_box.click()
+                            if end_time > time.time():
+                                time.sleep(end_time-time.time())
+                            else: pass
+                        except:
+                            print('error at the section to read and post summary only')
+                            driver.refresh()
+                            time.sleep(2)
+                            continue
+                        
+                    del start_time, end_time, username, passiv, logbut, la_herd, first_post_box, summary_comment
+                    break
+                except:
+                    print('error at read and summarize section')
+                    try:
+                        bany = driver.switch_to.alert
+                        bany.dismiss()
+                        del bany
+                    except:
+                        driver.refresh()
+                        time.sleep(sec_intervals/4)
+                        tata += 1
+                    continue
+            
+            gc.collect()
+            if tata >= 5:
+                try:
+                    driver.get(current_url)
+                    driver.implicitly_wait(10)
+                except:
+                    driver.get(current_url)
+                    driver.implicitly_wait(10)
+                time.sleep(180 )
+                continue
+            else: tata = 0
+        
+            # handle formalities
+            landage += 1
+            completed += 1
+            driver.execute_script("window.history.go(-2)")
+            time.sleep(sec_intervals/4)
+            yield completed, pager
+            if completed == todays_post_target:
+                print('last page is: ', pager, '\n', 'next day post var is: ', post_var)
+                completed = 0
+                pager = 0
+                landage = 0
+                post_var += 1
+                driver.quit()
+            else: pass
+        except:
+            try:
+                driver.get(current_url)
+                driver.implicitly_wait(10)
+            except:
+                driver.get(current_url)
+                driver.implicitly_wait(10)
+            continue
+                
+glob_completed = None
+glob_pager  = None        
 while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
     tata = 0
     try:
@@ -110,24 +269,27 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
                 logbut = driver.find_element_by_xpath('//*[@id="main"]/div[4]/div/div/div[1]/div/div/form/div[4]/button')
                 ActionChains(driver).move_to_element(logbut).perform()
                 logbut.click()
+                
                 del username, passiv, logbut
                 break
             
             except:
                 print('error at login section')
                 try:
-                    driver.switch_to.alert.dismiss()
+                    bany = driver.switch_to.alert
+                    bany.dismiss()
+                    del bany    
                 except:
                     driver.refresh()
-                    time.sleep(sec_intervals/4)
+                    time.sleep(5)
                     tata += 1
                 continue
-                
+        
         gc.collect()
         
         if tata >= 5:
             driver.quit()
-            time.sleep(200)
+            time.sleep(180)
             continue
         else: 
             tata = 0
@@ -135,163 +297,23 @@ while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
         print('error at connection section')
         driver.quit()
         time.sleep(180)
-        continue
-
+        continue 
+           
+    for value in handler():
+        if value[0] in range(0,11):
+            print('No of completed posts: ', value[0])
+        elif value[0] % 10 == 0:
+            print('No of completed posts: ', value[0])
+        else:
+            pass
         
-    while completed < todays_post_target:
-        tata = 0
-        while tata < 5: #click post
-            try:
-                WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.CLASS_NAME, 'blog-list-details')))
-                username = driver.find_element_by_class_name('blog-list-details') #find all elements that represent an article
-                passiv = username.find_elements_by_class_name('item-details')
-                
-                if landage >= len(passiv): #if the landage variable is greater than the number of articles present go to the next page on the pagination
-                    landage = 0
-                    pager += 1
-                    current_url = "https://wakanda.ng/?page=" + str(pager)
-                    driver.get(current_url)
-                    driver.implicitly_wait(sec_intervals/2)
-                    continue
-                else: pass
-                        
-                noci = passiv[landage].find_element_by_tag_name('a') #use landage variable to select one page
-                ActionChains(driver).move_to_element(noci).perform()
-                noci.click()
-                driver.implicitly_wait(sec_intervals/4)
-                del username, passiv, noci
-                break
-            except:
-                print('error at click post section')
-                try:
-                    driver.switch_to.alert.dismiss()
-                except:
-                    driver.refresh()
-                    time.sleep(sec_intervals/4)
-                    tata += 1
-                continue
+        glob_completed = value[0]
+        glob_pager = value[1]
         
-        gc.collect()
-        if tata >= 5:
-            driver.get(current_url)
-            time.sleep(200)
-            continue
-        else: 
-            tata = 0
-            
-        #read and summarize post
-        while tata < 5:
-            try: #read post and send reply
-                WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.CLASS_NAME, 'topic-content')))
-                try:
-                    username = driver.find_element_by_class_name('plan2-recommended')
-                    username = username.text
-                except:
-                    username = driver.find_element_by_class_name('float-left')
-                    username = username.text[0:-10]
-                
-                start_time = time.time()
-                end_time = start_time + (sec_intervals - 3)                   
-                while time.time() <= end_time: #this section find the post needed and summarize it scroll down to the comments section and post the summary, scroll back up and hover over some ads
-                    try:
-                        passiv = driver.find_element_by_class_name('topic-content') #find the post and needed and summarize it
-                        try:
-                            logbut = passiv.find_elements_by_tag_name('p')
-                            first_post_box = [note.text for note in logbut]
-                            la_herd = ''.join(first_post_box)
-                        except:
-                            try:
-                                logbut = passiv.find_element_by_tag_name('p')
-                                noci = logbut.find_elements_by_tag_name('span')
-                                first_post_box = [note.text for note in noci]
-                                la_herd = ''.join(first_post_box)
-                            except:
-                                la_herd = ' '       
-                        try:
-                            summary_comment = post_summarizer(la_herd)
-                        except:
-                            summary_comment = username
-                        
-                        try:
-                            username = driver.find_element_by_id('editor') #scroll down to the comments section and post the summary
-                        except:
-                            break
-                        ActionChains(driver).move_to_element(username).perform()
-                        passiv = username.find_element_by_tag_name('iframe')
-                        driver.switch_to.frame(passiv)
-                        logbut = driver.find_element_by_tag_name('p')
-                        ActionChains(driver).move_to_element(logbut).perform()
-                        logbut.click()
-                        driver.execute_script("arguments[0].innerText = arguments[1] ", logbut, summary_comment)
-                        driver.switch_to.default_content()
-                        first_post_box = driver.find_element_by_id('ReplyButton')
-                        ActionChains(driver).move_to_element(first_post_box).perform()
-                        first_post_box.click()
-                        if end_time > time.time():
-                            time.sleep(end_time-time.time())
-                        else: pass
-                    except:
-                        print('error at the section to read and post summary only')
-                        driver.refresh()
-                        time.sleep(2)
-                        continue
-                break
-            except:
-                print('error at read and summarize section')
-                try:
-                    driver.switch_to.alert.dismiss()
-                except:
-                    driver.refresh()
-                    time.sleep(sec_intervals/4)
-                    tata += 1
-                continue
-            
-        del start_time, end_time, username, passiv, logbut, la_herd, first_post_box, summary_comment
-        gc.collect()
-        
-        if tata >= 5:
-            driver.get(current_url)
-            time.sleep(200)
-            continue
-        else: 
-            tata = 0
-        
-        # handle formalities
-        landage += 1
-        completed += 1
-        driver.get(current_url)
-        time.sleep(sec_intervals/4)
-        
-        if completed <=5:
-            print('No of posts:', completed)
-        elif completed % 10 == 0:
-            print('No of posts:', completed)
-        else: pass
-            
-    if completed == todays_post_target:
-        print('last page is: ', pager, '\n', 'next day post var is: ', post_var)
-        completed = 0
-        pager = 0
-        landage = 0
-        post_var += 1
-        driver.quit()
-        break
-    else: pass
-            
-            
-
-post_var += 1
-print('last page is: ', pager, '\n', 'next day post var is: ', post_var)
-completed = 0
-pager = 0
-landage = 0
     
-if time.localtime()[3] == 23:            
+print('pager val is: ', glob_pager)    
+if time.localtime()[3] == 23:
     time.sleep(32000)
 elif time.localtime()[3] in range(0,8):
     time.sleep((8 - time.localtime()[3]) * 3600)
-else: pass
-        
-    
-
-    
+else: pass    
