@@ -117,13 +117,14 @@ def handler():
             gc.collect()
             if tata >= 5:
                 tata = 0
+                time.sleep(600)
                 try:
                     driver.get(current_url)
                     driver.implicitly_wait(10)
                 except:
+                    time.sleep(300)
                     driver.get(current_url)
                     driver.implicitly_wait(10)
-                time.sleep(600)
                 continue
             else: tata = 0
             
@@ -202,12 +203,13 @@ def handler():
             gc.collect()
             if tata >= 5:
                 try:
+                    time.sleep(600)
                     driver.get(current_url)
                     driver.implicitly_wait(10)
                 except:
+                    time.sleep(300)
                     driver.get(current_url)
                     driver.implicitly_wait(10)
-                time.sleep(600)
                 continue
             else: tata = 0
         
