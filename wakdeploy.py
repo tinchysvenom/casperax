@@ -66,26 +66,89 @@ def post_summarizer(article):
     del article, stopWords, art_words, sentence_list, i, xab, max_weight, xac, xad, l, xae, split_k, maxy, maxx, summary_list, summary
     gc.collect()
     
+    
+#3509, 3653, 3901, 3671, 3917, 3677, 3923, 3709, 3953, 3733, 3973, 3743, 3989, 3749, 3991   
+post_targets = [2509, 2751, 2517, 2761, 2523, 2763, 2529, 2769, 2539, 2781, 2547, 2793, 2557, 2803, 2643, 2889]
+post_var = 0
+todays_post_target = post_targets[post_var]
+sec_intervals = (54000/todays_post_target)
+completed = 0
+landage = 0
+pager = 1
+current_url = "https://wakanda.ng/?page=" + str(pager)
 
-def handler():
-    post_targets = [2509, 2751, 2517, 2761, 2523, 2763, 2529, 2769, 2539, 2781, 2547, 2793, 2557, 2803, 2643, 2889]
-    post_var = 0
-    todays_post_target = post_targets[post_var]
-    sec_intervals = (54000/todays_post_target)
-    completed = 0
-    landage = 0
-    pager = 1
-    current_url = "https://wakanda.ng/?page=" + str(pager)
+while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
+    tata = 0
+    try:
+        chrome_options = Options() #the code to open/connect to the site starts here, the code to handle the login goes here
+        chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-gpu")
+        chrome_options.add_argument('--disable-dev-shm-usage')
+        chrome_options.add_argument("--disable-infobars")
+        chrome_options.add_argument("--disable-notifications")
+        chrome_options.binary_location = '/app/.apt/usr/bin/google-chrome'
+        driver = webdriver.Chrome(executable_path="chromedriver",   options=chrome_options)
+        driver.get("https://wakanda.ng/login")
+        time.sleep(5)
+        
+        while tata < 5: #log in
+            try:
+                WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.ID, 'nameField')))
+                username = driver.find_element_by_id('nameField')
+                ActionChains(driver).move_to_element(username).perform()
+                username.click()
+                username.clear()
+                username.send_keys('Tinchysvenom')
+                
+                passiv = driver.find_element_by_id('passwordField')
+                ActionChains(driver).move_to_element(passiv).perform()
+                passiv.click()
+                passiv.clear()
+                passiv.send_keys('audaceusfortunaiuvat456')
+                    
+                logbut = driver.find_element_by_xpath('//*[@id="main"]/div[4]/div/div/div[1]/div/div/form/div[4]/button')
+                ActionChains(driver).move_to_element(logbut).perform()
+                logbut.click()
+                
+                del username, passiv, logbut
+                break
+            
+            except:
+                print('error at login section')
+                try:
+                    bany = driver.switch_to.alert
+                    bany.dismiss()
+                    del bany    
+                except:
+                    driver.refresh()
+                    time.sleep(sec_intervals/4)
+                    tata += 1
+                continue
+        
+        gc.collect()
+        
+        if tata >= 5:
+            driver.quit()
+            time.sleep(180)
+            continue
+        else: 
+            tata = 0
+    except:
+        print('error at connection section')
+        driver.quit()
+        time.sleep(180)
+        continue
+
+        
     while completed < todays_post_target:
         try:
             tata = 0
             while tata < 5: #click post
                 try:
-                 
                     WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.CLASS_NAME, 'blog-list-details')))
                     username = driver.find_element_by_class_name('blog-list-details') #find all elements that represent an article
-                    passiv = username.find_elements_by_class_name('item-details')
-                
+                    passiv = username.find_elements_by_class_name('item-details')    
                     if landage >= len(passiv): #if the landage variable is greater than the number of articles present go to the next page on the pagination
                         landage = 0
                         pager += 1
@@ -94,7 +157,6 @@ def handler():
                         driver.implicitly_wait(sec_intervals/2)
                         continue
                     else: pass
-                        
                     noci = passiv[landage].find_element_by_tag_name('a') #use landage variable to select one page
                     ActionChains(driver).move_to_element(noci).perform()
                     noci.click()
@@ -110,26 +172,23 @@ def handler():
                         del bany
                     except:
                         driver.refresh()
-                        time.sleep(sec_intervals/2)
+                        driver.implicitly_wait(5)
                         tata += 1
                     continue
         
             gc.collect()
             if tata >= 5:
-                tata = 0
-                time.sleep(600)
+                time.sleep(250)
                 try:
                     driver.get(current_url)
-                    driver.implicitly_wait(10)
                 except:
-                    time.sleep(300)
+                    time.sleep(60)
                     driver.get(current_url)
-                    driver.implicitly_wait(10)
                 continue
             else: tata = 0
             
-            #read and summarize post
-            while tata < 5:
+            
+            while tata < 5: #read and summarize post
                 try: #read post and send reply
                     WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.CLASS_NAME, 'topic-content')))
                     try:
@@ -183,7 +242,6 @@ def handler():
                         except:
                             print('error at the section to read and post summary only')
                             driver.refresh()
-                            time.sleep(2)
                             continue
                         
                     del start_time, end_time, username, passiv, logbut, la_herd, first_post_box, summary_comment
@@ -202,14 +260,12 @@ def handler():
             
             gc.collect()
             if tata >= 5:
+                time.sleep(250)
                 try:
-                    time.sleep(600)
                     driver.get(current_url)
-                    driver.implicitly_wait(10)
                 except:
-                    time.sleep(300)
+                    time.sleep(60)
                     driver.get(current_url)
-                    driver.implicitly_wait(10)
                 continue
             else: tata = 0
         
@@ -218,104 +274,41 @@ def handler():
             completed += 1
             driver.execute_script("window.history.go(-2)")
             time.sleep(sec_intervals/4)
-            yield completed, pager
-            if completed == todays_post_target:
-                print('last page is: ', pager, '\n', 'next day post var is: ', post_var)
-                completed = 0
-                pager = 0
-                landage = 0
-                post_var += 1
-                driver.quit()
+        
+            if completed <=9:
+                print('No of posts:', completed)
+            elif completed % 10 == 0:
+                print('No of posts:', completed)
             else: pass
         except:
+            time.sleep(250)
             try:
                 driver.get(current_url)
-                driver.implicitly_wait(10)
             except:
+                time.sleep(60)
                 driver.get(current_url)
-                driver.implicitly_wait(10)
             continue
-                
-glob_completed = None
-glob_pager  = None        
-while time.localtime()[3] <= 22 and time.localtime()[3] >= 7:
-    tata = 0
-    try:
-        chrome_options = Options() #the code to open/connect to the site starts here, the code to handle the login goes here
-        chrome_options.add_argument("--headless")
-        chrome_options.add_argument("--no-sandbox")
-        chrome_options.add_argument("--disable-gpu")
-        chrome_options.add_argument('--disable-dev-shm-usage')
-        chrome_options.add_argument("--disable-infobars")
-        chrome_options.add_argument("--disable-notifications")
-        chrome_options.binary_location = '/app/.apt/usr/bin/google-chrome'
-        driver = webdriver.Chrome(executable_path="chromedriver",   options=chrome_options)
-        driver.get("https://wakanda.ng/login")
-        time.sleep(5)
-        
-        while tata < 5: #log in
-            try:
-                WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.ID, 'nameField')))
-                username = driver.find_element_by_id('nameField')
-                ActionChains(driver).move_to_element(username).perform()
-                username.click()
-                username.clear()
-                username.send_keys('Tinchysvenom')
-                
-                passiv = driver.find_element_by_id('passwordField')
-                ActionChains(driver).move_to_element(passiv).perform()
-                passiv.click()
-                passiv.clear()
-                passiv.send_keys('audaceusfortunaiuvat456')
-                    
-                logbut = driver.find_element_by_xpath('//*[@id="main"]/div[4]/div/div/div[1]/div/div/form/div[4]/button')
-                ActionChains(driver).move_to_element(logbut).perform()
-                logbut.click()
-                
-                del username, passiv, logbut
-                break
-            
-            except:
-                print('error at login section')
-                try:
-                    bany = driver.switch_to.alert
-                    bany.dismiss()
-                    del bany    
-                except:
-                    driver.refresh()
-                    time.sleep(5)
-                    tata += 1
-                continue
-        
-        gc.collect()
-        
-        if tata >= 5:
-            driver.quit()
-            time.sleep(180)
-            continue
-        else: 
-            tata = 0
-    except:
-        print('error at connection section')
-        driver.quit()
-        time.sleep(180)
-        continue 
-           
-    for value in handler():
-        if value[0] in range(0,11):
-            print('No of completed posts: ', value[0])
-        elif value[0] % 10 == 0:
-            print('No of completed posts: ', value[0])
-        else:
-            pass
-        
-        glob_completed = value[0]
-        glob_pager = value[1]
-        
     
-print('pager val is: ', glob_pager)    
-if time.localtime()[3] == 23:
+    if completed == todays_post_target:
+        print('last page is: ', pager, '\n', 'next day post var is: ', post_var)
+        completed = 0
+        pager = 0
+        landage = 0
+        post_var += 1
+        driver.quit()
+        break
+    else: pass
+            
+            
+
+post_var += 1
+print('last page is: ', pager, '\n', 'next day post var is: ', post_var)
+completed = 0
+pager = 0
+landage = 0
+    
+if time.localtime()[3] == 23:            
     time.sleep(32000)
 elif time.localtime()[3] in range(0,8):
     time.sleep((8 - time.localtime()[3]) * 3600)
-else: pass    
+else: pass
