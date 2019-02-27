@@ -81,7 +81,7 @@ def handler():
             tata = 0
             while tata < 5: #click post
                 try:
-                    driver.refresh()
+                 
                     WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.CLASS_NAME, 'blog-list-details')))
                     username = driver.find_element_by_class_name('blog-list-details') #find all elements that represent an article
                     passiv = username.find_elements_by_class_name('item-details')
@@ -123,7 +123,7 @@ def handler():
                 except:
                     driver.get(current_url)
                     driver.implicitly_wait(10)
-                time.sleep(180)
+                time.sleep(600)
                 continue
             else: tata = 0
             
@@ -207,7 +207,7 @@ def handler():
                 except:
                     driver.get(current_url)
                     driver.implicitly_wait(10)
-                time.sleep(180 )
+                time.sleep(600)
                 continue
             else: tata = 0
         
