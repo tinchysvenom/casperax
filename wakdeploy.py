@@ -72,8 +72,8 @@ post_targets = [2509, 2751, 2517, 2761, 2523, 2763, 2529, 2769, 2539, 2781, 2547
 post_var = 0
 todays_post_target = post_targets[post_var]
 sec_intervals = (54000/todays_post_target)
-completed = 0
-landage = 0
+completed = 29
+landage = 29
 pager = 1
 current_url = "https://wakanda.ng/?page=" + str(pager)
 
