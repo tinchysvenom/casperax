@@ -104,7 +104,7 @@ print('Logged in')
 
 tata = 0       
 lani = []
-ita = iter(range(1,3))
+ita = iter(range(1,41))
 
 for pager in ita:
     tata = 0
