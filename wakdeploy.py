@@ -4,6 +4,8 @@ Created on Mon Jan 14 20:55:45 2019
 
 @author: USER
 """
+
+
 import re
 import gc
 import time
@@ -82,7 +84,6 @@ chrome_options.binary_location = '/app/.apt/usr/bin/google-chrome'
 driver = webdriver.Chrome(executable_path="chromedriver",   options=chrome_options)
 driver.get("https://wakanda.ng/login")
 
-
 WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.ID, 'nameField')))
 username = driver.find_element_by_id('nameField')
 ActionChains(driver).move_to_element(username).perform()
@@ -103,7 +104,7 @@ print('Logged in')
 
 tata = 0       
 lani = []
-ita = iter(range(1,41))
+ita = iter(range(1,3))
 
 for pager in ita:
     tata = 0
@@ -124,7 +125,7 @@ for pager in ita:
         except:
             time.sleep(20)
             continue
-
+        
 print('Part 1 for gathering articles completed')        
 completed = 0              
 lani_gen = (xad for xad in lani)
@@ -182,7 +183,7 @@ for xae in lani_gen:
             ActionChains(driver).move_to_element(first_post_box).perform()
             first_post_box.click()
                
-            del start_time, end_time, passiv, logbut, la_herd, first_post_box, summary_comment
+            del passiv, username, logbut, la_herd, first_post_box, summary_comment
             break
         except:
             print('error at read and summarize section')
@@ -196,9 +197,7 @@ for xae in lani_gen:
                 tata += 1
             continue
     gc.collect()
-    print(completed)
+    print('Number of completed articles: ', completed)
     completed += 1
 
 print(xae, '\n', 'Finished for the day')
-
-
