@@ -72,7 +72,7 @@ else: pass
 
 print('Starting todays activity')
 chrome_options = Options() #the code to open/connect to the site starts here, the code to handle the login goes here
-#chrome_options.add_argument("--headless")
+chrome_options.add_argument("--headless")
 chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument('--disable-dev-shm-usage')
@@ -124,6 +124,7 @@ for pager in ita:
         except:
             time.sleep(20)
             continue
+
 print('Part 1 for gathering articles completed')        
 completed = 0              
 lani_gen = (xad for xad in lani)
